@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-schema-init
+  namespace: supabase
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+      - name: psql-client
+        image: supabase/postgres:15.8.1.060
+        command: 
+        - /bin/bash
+        - -c
+        - |
+          echo "Waiting for PostgreSQL to be ready..."
+          until PGPASSWORD=$POSTGRES_PASSWORD psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -c "SELECT 1"; do
+            sleep 2
+          done
+          
+          echo "Applying schema..."
+          PGPASSWORD=$POSTGRES_PASSWORD psql -h postgres -U $POSTGRES_USER -d $POSTGRES_DB -f /sql/01-schema.sql
+          
+          echo "Schema applied successfully!"
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database
+        volumeMounts:
+        - name: sql-scripts
+          mountPath: /sql
+      restartPolicy: OnFailure
+      volumes:
+      - name: sql-scripts
+        configMap:
+          name: postgres-init-scripts
