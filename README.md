@@ -25,32 +25,7 @@ Projet de test et d'exploration pour déployer une stack Supabase sur Kubernetes
 
 ## 🗂️ Structure du projet
 
-\`\`\`bash
-kubernetes-supabase-test/
-├── apps/                   # Manifests pour chaque service Supabase
-│   ├── postgres/
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── kustomization.yaml
-│   ├── studio/
-│   ├── kong/
-│   ├── auth/
-│   ├── realtime/
-│   ├── rest/
-│   ├── storage/
-│   └── ...
-├── overlays/               # Configs spécifiques à un environnement
-│   └── dev/
-│       └── kustomization.yaml
-├── argo-cd/                # Définition de l'application Argo CD
-│   └── supabase-app.yaml
-├── scripts/                # Scripts d'initialisation et d'automatisation
-│   └── init-secrets.sh
-├── secrets/                # Secrets non versionnés
-│   └── README.md
-├── .gitignore
-└── README.md
-\`\`\`
+
 
 ---
 
@@ -72,15 +47,11 @@ k3d cluster create supabase-cluster --agents 2 --port "8080:80@loadbalancer"
 
 ### 3. Déploiement avec kustomize
 
-\`\`\`bash
-kubectl apply -k overlays/dev/
-\`\`\`
+
 
 ### 4. Ajouter le projet à Argo CD
 
-\`\`\`bash
-argocd app create supabase   --repo https://github.com/PierreOudin/kubernetes-supabase-test.git   --path overlays/dev   --dest-server https://kubernetes.default.svc   --dest-namespace default   --sync-policy automated
-\`\`\`
+
 
 ---
 
